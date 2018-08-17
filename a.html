@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+
+        table, td {
+            border: 1px solid #ddd;
+        }
+
+        .router-link-active {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <table>
+        <tr>
+            <td>
+                <button @click="reverseMessage">Reverse</button>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Checked: {{ checked }}</td>
+            <td>Picked: {{ picked }}</td>
+            <td>Selected: {{ selected }}</td>
+            <td>Router</td>
+            <td>Router</td>
+        </tr>
+        <tr>
+            <td><h1>{{message}}</h1></td>
+            <td><p :title="info">鼠标悬停查看提示信息！</p></td>
+            <td>
+                <input type="text" v-model="str">
+                <p>{{str}}</p>
+                <button :disabled="isButtonDisabled">Button</button>
+            </td>
+            <td><p>{{fullName}} = {{firstName}} + {{lastName}}</p></td>
+            <td>
+                <input type="checkbox" id="jack" value="Jack" v-model="checked">
+                <label for="jack">Jack</label>
+                <input type="checkbox" id="john" value="John" v-model="checked">
+                <label for="john">John</label>
+                <input type="checkbox" id="mike" value="Mike" v-model="checked">
+                <label for="mike">Mike</label>
+            </td>
+            <td>
+                <input type="radio" id="one" value="One" v-model="picked">
+                <label for="one">One</label>
+                <input type="radio" id="two" value="Two" v-model="picked">
+                <label for="two">Two</label>
+                <input type="radio" id="three" value="Three" v-model="picked">
+                <label for="three">Three</label>
+            </td>
+            <td>
+                <select v-model="selected">
+                    <option disabled value="">请选择</option>
+                    <option>A</option>
+                    <option>B</option>
+                    <option>C</option>
+                </select>
+            </td>
+            <td>
+                <router-link to="/foo/aa">Go to Foo</router-link>
+                <router-link to="/bar/bb">Go to Bar</router-link>
+            </td>
+            <td>
+                <router-view></router-view>
+            </td>
+        </tr>
+    </table>
+    <btn v-bind:count="counter"></btn>
+    <btn v-bind:count="counter + 1"></btn>
+    <ul>
+        <todo v-for="todo in todos" v-bind:key="todo.id" v-bind:todo="todo"></todo>
+        <li><input v-model="filterText"/></li>
+        <li v-for="item in obj" v-show="myfilter(item.label)">{{myfilter(item.label)}}</li>
+    </ul>
+</div>
+</body>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/vue-router/3.0.1/vue-router.min.js"></script>
+<script>
+    Vue.component('btn', {
+        props: ['count'],
+        template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+    });
+    Vue.component('todo', {
+        props: ['todo'],
+        template: '<li>{{todo.text}}</li>'
+    });
+    const Foo = {template: '<h3>Foo {{$route.params.name}}</h3>'};
+    const Bar = {template: '<div><router-link to="/bar/bb/one">One</router-link> <router-link to="/bar/bb/three">Two</router-link><router-view></router-view></div>'};
+    const One = {template: '<h4>One</h4>'};
+    const Two = {template: '<h4>Two</h4>'};
+    const NotFound = {template: '<h4>NotFound</h4>'};
+    const router = new VueRouter({
+        routes: [
+            {path: '/', component: ''},
+            {path: '/foo/:name', component: Foo},
+            {
+                path: '/bar/:name',
+                component: Bar,
+                children: [
+                    {path: 'one', component: One},
+                    {path: 'two', redirect: 'three'},
+                    {path: 'three', component: Two}
+                ]
+            },
+            {path: '*', component: NotFound}
+        ]
+    });
+    const app = new Vue({
+        el: '#app',
+        router: router,
+        data: {
+            message: 'hello!',
+            info: '页面加载于 ' + new Date().toLocaleString(),
+            seen: true,
+            str: '现在你看到我了',
+            todos: [
+                {id: 1, text: '学习 JavaScript', name: {first: 'a', last: 'b'}},
+                {id: 2, text: '学习 Vue', name: {first: 'c', last: 'd'}},
+                {id: 3, text: '整个 Project', name: {first: 'e', last: 'f'}}
+            ],
+            isButtonDisabled: true,
+            firstName: 'Foo',
+            lastName: 'Bar',
+            checked: [],
+            picked: '',
+            selected: '',
+            selected_: [],
+            counter: 0,
+            obj: [
+                {value: 0, label: "Apple"},
+                {value: 1, label: "Almond"},
+                {value: 2, label: "Banana"},
+                {value: 3, label: "Blackberry"},
+                {value: 4, label: "Cherry"},
+            ],
+            filterText: ""
+        },
+        computed: {
+            fullName: function () {
+                return this.firstName + ' ' + this.lastName
+            }
+        },
+        methods: {
+            reverseMessage: function () {
+                this.message = this.message.split('').reverse().join('');
+            },
+            myfilter: function (value) {
+                if (value.indexOf(this.filterText) > -1) {
+                    return value
+                }
+            }
+        }
+    });
+
+    //快速排序
+    Array.prototype.quickSort = function() {
+        const l = this.length;
+        if(l < 2) return this;
+        const basic = this[0], left = [], right = [];
+        for(let i = 1; i < l; i++) {
+            const iv = this[i];
+            iv >= basic && right.push(iv);
+            iv < basic && left.push(iv)
+        }
+        console.log(left, right);
+        return left.quickSort().concat(basic, right.quickSort())
+    };
+    const arr = [5, 3, 7, 4, 1, 9, 8, 6, 2];
+    arr.quickSort()
+
+</script>
+</html>
